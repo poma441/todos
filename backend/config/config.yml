@@ -6,7 +6,7 @@ db:
   host: "localhost"
   port: "5432"
   username: "postgres"
-  dbname: "todos_db"
+  name: "todos_db"
   password: "123"
   sslmode: "disable"
   

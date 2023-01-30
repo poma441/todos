@@ -1,12 +1,16 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"todos/config"
-	"todos/internal/server"
 )
 
 func main() {
-	if err := server.Run(config.InitConfig()); err != nil {
-		return
+	cfg, err := config.InitConfig("../config")
+	if err != nil {
+		log.Fatal("Ошибка инициализации")
 	}
+	fmt.Println(cfg.DB.Host)
+	//server.Run(cfg)
 }

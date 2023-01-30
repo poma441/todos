@@ -1,20 +1,48 @@
 package config
 
-type Config struct {
-	ServerHost string
-	ServerPort string
-	DbHost     string
-	DbPort     string
-	DbUsername string
-	DbName     string
-	DbPassword string
-	DbSslMode  string
-}
+import (
+	"github.com/spf13/viper"
+)
 
-func InitConfig() *Config {
-	config := new(Config)
+type (
 
+	// Config
+	Config struct {
+		Server `yaml:"server"`
+		DB     `yaml:"db"`
+	}
+
+	// Server
+	Server struct {
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	}
+
+	// DB
+	DB struct {
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		Username string `yaml:"username"`
+		Name     string `yaml:"name"`
+		Password string `yaml:"password"`
+		SslMode  string `yaml:"sslmode"`
+	}
+)
+
+func InitConfig(path string) (config Config, err error) {
 	// Инициализация конфига
+	viper.AddConfigPath(path)
+	viper.SetConfigName("config")
+	viper.SetConfigType("yml")
 
-	return config
+	viper.AutomaticEnv()
+
+	err = viper.ReadInConfig()
+	if err != nil {
+		return
+	}
+
+	err = viper.Unmarshal(&config)
+
+	return
 }

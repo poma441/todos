@@ -2,7 +2,7 @@ package server
 
 import "todos/config"
 
-func Run(conf *config.Config) error {
+func Run(conf config.Config) error {
 	// Запуск сервера
 }
 
