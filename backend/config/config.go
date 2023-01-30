@@ -35,8 +35,6 @@ func InitConfig(path string) (config Config, err error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
 
-	viper.AutomaticEnv()
-
 	err = viper.ReadInConfig()
 	if err != nil {
 		return

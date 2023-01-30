@@ -11,6 +11,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Ошибка инициализации")
 	}
-	fmt.Println(cfg.DB.Host)
+	fmt.Println(cfg.Server.Host)
+	fmt.Println(cfg.DB.Name)
 	//server.Run(cfg)
 }
