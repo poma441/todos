@@ -9,7 +9,7 @@ import (
 func main() {
 	cfg, err := config.InitConfig("../config")
 	if err != nil {
-		log.Fatal("Ошибка инициализации")
+		log.Fatal("Ошибка инициализации", err)
 	}
 	fmt.Println(cfg.Server.Host)
 	fmt.Println(cfg.DB.Name)

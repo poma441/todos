@@ -1,8 +1,8 @@
 package service
 
 import (
+	"todos/internal/entity"
 	"todos/internal/repository"
-	service_routes "todos/internal/service/service_routes"
 )
 
 type Authorization interface {
@@ -10,7 +10,10 @@ type Authorization interface {
 }
 
 type ToDoItem interface {
-	PlugFunc()
+	GetToDoItemsList(userId int) ([]entity.ToDoItem, error)
+	AddToDoItem(userId int) (entity.ToDoItem, error)
+	UpdateToDoItem(toDoItemId int) (entity.ToDoItem, error)
+	DeleteToDoItem(toDoItemId int) (int, error)
 }
 
 type Service struct {
@@ -20,7 +23,7 @@ type Service struct {
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		Authorization: service_routes.NewAuthService(repos.Authorization),
-		ToDoItem:      service_routes.NewToDoItemService(repos.ToDoItem),
+		Authorization: NewAuthService(repos.Authorization),
+		ToDoItem:      NewToDoItemService(repos.ToDoItem),
 	}
 }

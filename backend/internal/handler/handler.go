@@ -17,7 +17,13 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := new(gin.Engine)
 
-	// Привязка маршрутов к обработчикам
+	todos := router.Group("/todos")
+	{
+		todos.GET("/:userid", h.GetToDoItemsList)
+		todos.POST("/:userid", h.AddToDoItem)
+		todos.PUT("/:id", h.UpdateToDoItem)
+		todos.DELETE("/:id", h.DeleteToDoItem)
+	}
 
 	return router
 }

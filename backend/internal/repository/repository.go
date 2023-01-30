@@ -1,9 +1,5 @@
 package repository
 
-import (
-	repository_routes "todos/internal/repository/repository_routes"
-)
-
 type Authorization interface {
 }
 
@@ -17,7 +13,7 @@ type Repository struct {
 
 func NewRepository() *Repository {
 	return &Repository{
-		Authorization: repository_routes.NewAuthRepo(),
-		ToDoItem:      repository_routes.NewToDoItemRepo(),
+		Authorization: NewAuthRepo(),
+		ToDoItem:      NewToDoItemRepo(),
 	}
 }
