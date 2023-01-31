@@ -15,7 +15,7 @@ func NewHandler(services *service.Service) *Handler {
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
-	router := new(gin.Engine)
+	router := gin.New()
 
 	todos := router.Group("/todos")
 	{
