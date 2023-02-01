@@ -18,6 +18,7 @@ func (h *Handler) GetToDoItemsList(c *gin.Context) {
 	toDoItemsList, err := h.services.ToDoItem.GetToDoItemsList(userId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, toDoItemsList)
@@ -35,6 +36,7 @@ func (h *Handler) AddToDoItem(c *gin.Context) {
 	toDoItem, err := h.services.ToDoItem.AddToDoItem(toDoItemForAdd)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, toDoItem)
@@ -50,6 +52,7 @@ func (h *Handler) UpdateToDoItem(c *gin.Context) {
 
 	if err := h.services.ToDoItem.UpdateToDoItem(toDoItemForUpdate); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "Updated successfully"})
@@ -65,6 +68,7 @@ func (h *Handler) DeleteToDoItem(c *gin.Context) {
 	deletedToDoItemId, err := h.services.ToDoItem.DeleteToDoItem(toDoItemId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	c.JSON(http.StatusOK, deletedToDoItemId)
