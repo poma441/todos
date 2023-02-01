@@ -20,6 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Ошибка подключения к БД:", err)
 	}
+
 	// Внедрение зависимостей
 	repo := repository.NewRepository(db)
 	service := service.NewService(repo)

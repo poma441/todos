@@ -11,8 +11,8 @@ type Authorization interface {
 
 type ToDoItem interface {
 	GetToDoItemsList(userId int) ([]entity.ToDoItem, error)
-	AddToDoItem(userId int) (entity.ToDoItem, error)
-	UpdateToDoItem(toDoItemId int) (entity.ToDoItem, error)
+	AddToDoItem(entity.ToDoItem) (int, error)
+	UpdateToDoItem(entity.ToDoItem) error
 	DeleteToDoItem(toDoItemId int) (int, error)
 }
 

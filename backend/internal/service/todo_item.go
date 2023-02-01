@@ -17,15 +17,14 @@ func NewToDoItemService(repo repository.ToDoItem) *ToDoItemService {
 
 func (s *ToDoItemService) GetToDoItemsList(userId int) ([]entity.ToDoItem, error) {
 	return s.repo.GetToDoItemsList(userId)
-
 }
 
-func (s *ToDoItemService) AddToDoItem(userId int) (entity.ToDoItem, error) {
-	return s.repo.AddToDoItem(userId)
+func (s *ToDoItemService) AddToDoItem(toDoItemForAdd entity.ToDoItem) (int, error) {
+	return s.repo.AddToDoItem(toDoItemForAdd)
 }
 
-func (s *ToDoItemService) UpdateToDoItem(toDoItemId int) (entity.ToDoItem, error) {
-	return s.repo.UpdateToDoItem(toDoItemId)
+func (s *ToDoItemService) UpdateToDoItem(toDoItemForUpdate entity.ToDoItem) error {
+	return s.repo.UpdateToDoItem(toDoItemForUpdate)
 }
 
 func (s *ToDoItemService) DeleteToDoItem(toDoItemId int) (int, error) {
