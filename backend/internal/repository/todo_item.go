@@ -42,9 +42,9 @@ func (r *ToDoItemRepo) AddToDoItem(toDoItemForAdd entity.ToDoItem) (int, error) 
 	return toDoItemForAdd.Id, nil
 }
 
-func (r *ToDoItemRepo) UpdateToDoItem(toDoItemForUpdate entity.ToDoItem) error {
+func (r *ToDoItemRepo) UpdateToDoItem(toDoItemForUpdate entity.ToDoItem, toDoItemId int) error {
 
-	result := r.db.Model(&toDoItemForUpdate).Where("id=?", toDoItemForUpdate.Id).Updates(&toDoItemForUpdate)
+	result := r.db.Model(&toDoItemForUpdate).Where("id=?", toDoItemId).Updates(&toDoItemForUpdate)
 	if result.RowsAffected == 0 {
 		log.Print("No update")
 		return errors.New("не удалось обновить информацию о деле с id = " + strconv.Itoa(toDoItemForUpdate.Id))

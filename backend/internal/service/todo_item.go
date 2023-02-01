@@ -23,8 +23,8 @@ func (s *ToDoItemService) AddToDoItem(toDoItemForAdd entity.ToDoItem) (int, erro
 	return s.repo.AddToDoItem(toDoItemForAdd)
 }
 
-func (s *ToDoItemService) UpdateToDoItem(toDoItemForUpdate entity.ToDoItem) error {
-	return s.repo.UpdateToDoItem(toDoItemForUpdate)
+func (s *ToDoItemService) UpdateToDoItem(toDoItemForUpdate entity.ToDoItem, toDoItemId int) error {
+	return s.repo.UpdateToDoItem(toDoItemForUpdate, toDoItemId)
 }
 
 func (s *ToDoItemService) DeleteToDoItem(toDoItemId int) (int, error) {

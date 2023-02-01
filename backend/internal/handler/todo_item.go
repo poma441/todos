@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"todos/internal/entity"
@@ -45,13 +44,18 @@ func (h *Handler) AddToDoItem(c *gin.Context) {
 
 func (h *Handler) UpdateToDoItem(c *gin.Context) {
 	var toDoItemForUpdate entity.ToDoItem
-	fmt.Println(toDoItemForUpdate.Id)
+	toDoItemId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	if err := c.BindJSON(&toDoItemForUpdate); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.services.ToDoItem.UpdateToDoItem(toDoItemForUpdate); err != nil {
+	if err := h.services.ToDoItem.UpdateToDoItem(toDoItemForUpdate, toDoItemId); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
