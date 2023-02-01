@@ -8,6 +8,7 @@ import (
 	"todos/internal/repository"
 	"todos/internal/server"
 	"todos/internal/service"
+	"todos/pkg/postgres"
 )
 
 func main() {
@@ -15,9 +16,12 @@ func main() {
 	if err != nil {
 		log.Fatal("Ошибка инициализации ", err)
 	}
-
+	db, err := postgres.NewConnectDB(cfg)
+	if err != nil {
+		log.Fatal("Ошибка:", err)
+	}
 	// Внедрение зависимостей
-	repo := repository.NewRepository()
+	repo := repository.NewRepository(db)
 	service := service.NewService(repo)
 	handler := handler.NewHandler(service)
 

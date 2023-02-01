@@ -1,9 +1,19 @@
 package repository
 
+import (
+	"todos/internal/entity"
+
+	"gorm.io/gorm"
+)
+
 type Authorization interface {
 }
 
 type ToDoItem interface {
+	GetToDoItemsList(userId int) ([]entity.ToDoItem, error)
+	AddToDoItem(userId int) (entity.ToDoItem, error)
+	UpdateToDoItem(toDoItemId int) (entity.ToDoItem, error)
+	DeleteToDoItem(toDoItemId int) (int, error)
 }
 
 type Repository struct {
@@ -11,9 +21,9 @@ type Repository struct {
 	ToDoItem
 }
 
-func NewRepository() *Repository {
+func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
 		Authorization: NewAuthRepo(),
-		ToDoItem:      NewToDoItemRepo(),
+		ToDoItem:      NewToDoItemRepo(db),
 	}
 }
