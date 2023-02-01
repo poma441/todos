@@ -18,7 +18,7 @@ func main() {
 	}
 	db, err := postgres.NewConnectDB(cfg)
 	if err != nil {
-		log.Fatal("Ошибка:", err)
+		log.Fatal("Ошибка подключения к БД:", err)
 	}
 	// Внедрение зависимостей
 	repo := repository.NewRepository(db)
