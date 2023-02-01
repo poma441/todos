@@ -47,7 +47,7 @@ func (r *ToDoItemRepo) UpdateToDoItem(toDoItemForUpdate entity.ToDoItem, toDoIte
 	result := r.db.Model(&toDoItemForUpdate).Where("id=?", toDoItemId).Updates(&toDoItemForUpdate)
 	if result.RowsAffected == 0 {
 		log.Print("No update")
-		return errors.New("не удалось обновить информацию о деле с id = " + strconv.Itoa(toDoItemForUpdate.Id))
+		return errors.New("не удалось обновить информацию о деле с id = " + strconv.Itoa(toDoItemId))
 	}
 
 	return nil
