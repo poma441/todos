@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"todos/internal/entity"
@@ -42,7 +43,7 @@ func (h *Handler) AddToDoItem(c *gin.Context) {
 
 func (h *Handler) UpdateToDoItem(c *gin.Context) {
 	var toDoItemForUpdate entity.ToDoItem
-
+	fmt.Println(toDoItemForUpdate.Id)
 	if err := c.BindJSON(&toDoItemForUpdate); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
