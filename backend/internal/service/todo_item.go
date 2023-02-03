@@ -19,8 +19,8 @@ func (s *ToDoItemService) GetToDoItemsList(userId int) ([]entity.ToDoItem, error
 	return s.repo.GetToDoItemsList(userId)
 }
 
-func (s *ToDoItemService) AddToDoItem(toDoItemForAdd entity.ToDoItem) (int, error) {
-	return s.repo.AddToDoItem(toDoItemForAdd)
+func (s *ToDoItemService) AddToDoItem(toDoItemForAdd entity.ToDoItem, toDoItemId int) (int, error) {
+	return s.repo.AddToDoItem(toDoItemForAdd, toDoItemId)
 }
 
 func (s *ToDoItemService) UpdateToDoItem(toDoItemForUpdate entity.ToDoItem, toDoItemId int) error {

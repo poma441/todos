@@ -30,9 +30,9 @@ func (r *ToDoItemRepo) GetToDoItemsList(userId int) ([]entity.ToDoItem, error) {
 	return items, nil
 }
 
-func (r *ToDoItemRepo) AddToDoItem(toDoItemForAdd entity.ToDoItem) (int, error) {
-
-	result := r.db.Where("user_id = ?", toDoItemForAdd.UserId).Create(&toDoItemForAdd)
+func (r *ToDoItemRepo) AddToDoItem(toDoItemForAdd entity.ToDoItem, toDoItemId int) (int, error) {
+	toDoItemForAdd.UserId = toDoItemId
+	result := r.db.Create(&toDoItemForAdd)
 
 	if result.RowsAffected == 0 {
 		log.Print("No created")

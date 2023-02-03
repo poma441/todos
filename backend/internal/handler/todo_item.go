@@ -27,13 +27,18 @@ func (h *Handler) GetToDoItemsList(c *gin.Context) {
 func (h *Handler) AddToDoItem(c *gin.Context) {
 	var toDoItemForAdd entity.ToDoItem
 
-	err := c.BindJSON(&toDoItemForAdd)
+	userId, err := strconv.Atoi(c.Param("userid"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	toDoItemId, err := h.services.ToDoItem.AddToDoItem(toDoItemForAdd)
+	if err := c.BindJSON(&toDoItemForAdd); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	toDoItemId, err := h.services.ToDoItem.AddToDoItem(toDoItemForAdd, userId)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -77,5 +82,5 @@ func (h *Handler) DeleteToDoItem(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, deletedToDoItemId)
+	c.JSON(http.StatusOK, gin.H{"status": "Deleted successfully, id = " + strconv.Itoa(deletedToDoItemId)})
 }
