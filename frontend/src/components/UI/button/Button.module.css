@@ -1,0 +1,18 @@
+.delete {
+    background-image: './styles/delete.jpeg';
+    background-repeat: no-repeat;
+}
+
+.edit {
+    background-image: './styles/edit.jpeg';
+    background-repeat: no-repeat;
+}
+.myBtn {
+    padding: 5px 15px;
+    color: rgb(7, 7, 9);
+    font: size 14px;
+    background: rgb(121, 126, 165);
+    border: 1px solid teal;
+    cursor: pointer;
+    margin: 5px;
+}

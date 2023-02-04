@@ -1,0 +1,28 @@
+#root {
+  display: flex;
+  justify-content: center;
+}
+
+.task {
+  display: flex;
+  padding: 15px;
+  border: 0px solid rgb(8, 7, 11);
+  border-radius: 10px;
+  margin-top: 15px;
+  justify-content: space-between;
+  align-items: center;
+  
+  
+}
+
+.bad{
+  background-color:  rgb(224, 21, 82);
+}
+
+.near {
+  background-color: rgb(255, 213, 0);
+}
+
+.good{
+  background-color: rgb(99, 146, 29);
+}
