@@ -44,7 +44,7 @@ func (h *Handler) AddToDoItem(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, toDoItemId)
+	c.JSON(http.StatusOK, gin.H{"id": toDoItemId})
 }
 
 func (h *Handler) UpdateToDoItem(c *gin.Context) {
@@ -66,7 +66,7 @@ func (h *Handler) UpdateToDoItem(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "Updated successfully, id = " + strconv.Itoa(toDoItemId)})
+	c.JSON(http.StatusOK, gin.H{"id": toDoItemId})
 }
 
 func (h *Handler) DeleteToDoItem(c *gin.Context) {
@@ -82,5 +82,5 @@ func (h *Handler) DeleteToDoItem(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "Deleted successfully, id = " + strconv.Itoa(deletedToDoItemId)})
+	c.JSON(http.StatusOK, gin.H{"id": deletedToDoItemId})
 }
