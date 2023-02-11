@@ -15,24 +15,24 @@ func NewAuthRepo(db *gorm.DB) *AuthRepo {
 	return &AuthRepo{db: db}
 }
 
-func (r *AuthRepo) CreateUser(NewUser entity.User) (int, error) {
+func (r *AuthRepo) CreateUser(newUser entity.User) (int, error) {
 
-	check := r.db.Where("username=?", NewUser.Username).Find(&NewUser)
+	check := r.db.Where("username=?", newUser.Username).Find(&newUser)
 	if check.RowsAffected != 0 {
 		return -1, errors.New("пользователем с таким именем существует")
 	}
-	result := r.db.Create(&NewUser)
+	result := r.db.Create(&newUser)
 	if result.RowsAffected == 0 {
 		return -1, errors.New("не удалось создать пользователя")
 	}
 
-	return NewUser.Id, nil
+	return newUser.Id, nil
 }
 
-func (r *AuthRepo) GetUser(InputUsername string) (entity.User, error) {
+func (r *AuthRepo) GetUser(inputUsername string) (entity.User, error) {
 
 	var user entity.User
-	result := r.db.First(&user, "username=?", InputUsername)
+	result := r.db.First(&user, "username=?", inputUsername)
 	if result.RowsAffected == 0 {
 		return user, errors.New("неверное имя пользователя или пароль")
 	}
