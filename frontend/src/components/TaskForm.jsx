@@ -1,11 +1,10 @@
 import React, {useState} from "react";
 import CustomInput from "./UI/input/CustomInput";
 import Button from "./UI/button/Button";
-import MyCalendar from "./MyCalendar";
 
 const TaskForm = ({create}) => {
 
-    const [task, setTask] = useState({id:'', task:'', isred: false, isdone: false});
+    const [task, setTask] = useState({id:'', task:'', isred: false, active: false});
 
     
     const addNewTask = (e) =>{
@@ -13,7 +12,8 @@ const TaskForm = ({create}) => {
         const newTask = {
             ...task, 
             id: Date.now(),
-            isred: false
+            isred: false,
+            active: true
         }
         create(newTask)
         setTask({task:'', isred: false})

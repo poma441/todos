@@ -1,12 +1,11 @@
 import React from "react";
 import Button from "./UI/button/Button";
-import MyCalendar from './MyCalendar';
 
 const TaskItem = (props) =>{
     if(props.task.active === props.setshow){
     return (
        
-        <div className= {props.getDead(props.task)}>
+        <div className= 'task good'>
              <input
              type='checkbox'
              checked={!props.task.active}
@@ -15,7 +14,6 @@ const TaskItem = (props) =>{
             }
              />
         <div className='task_content'>
-        <strong> {props.number} </strong>
         <input
         type='text'
         value = {props.task.task}

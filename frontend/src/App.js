@@ -1,51 +1,29 @@
 import cl from './styles/App.css'
 import React, {useState,userRef} from 'react';
 import Button from './components/UI/button/Button'
-import MyCalendar from './components/MyCalendar';
 import TaskItem from './components/TaskItem';
 import TaskForm from './components/TaskForm';
 import { createStore } from 'redux';
+import { useDispatch, useSelector } from 'react-redux';
+
 function App() {
-
-  const [tasks, setTasks] = useState ([
-    {id: 1, task:'make front',active: true,  isred: false},
-    {id:2, task: 'make back',active: true,  isred: false},
-    {id:3, task: 'make back2',active: false,  isred: false},
-    {id:4, task: 'make back3',active: false,  isred: false}
-  ])
+  const dispatch = useDispatch()
+  const tasks = useSelector(state => state.tasks)
   
-  //const reducer = (state,action) => {
-  //  switch (action.type){
 
-   //   default:
-   //     return state
-  //  }
-
-  //}
-
-  //const store = createStore()
-
-  const removeTask = (task)=>{
-    setTasks(tasks.filter(tsk=>tsk.id!==task.id))
+  const createTask = (newTask)=>{
+    dispatch({type:"ADD_TASK",payload: newTask})
   }
 
-  const createTask= (newTask)=> {
-    setTasks([...tasks, newTask])
+  const removeTask = (task) => {
+    dispatch({type: "REMOVE_TASK",payload: task})
   }
+
+
 
   const editTask = (task, param,value) => {
-    setTasks (tasks.map(tsk => {
-      if (tsk.id === task.id) return {...tsk, [param]:value }
-      else return tsk;
-    }))
+    dispatch({type: "EDIT_TASK",payload: {task:task, param:param, value:value}})
     console.log(task)
-  }
-
-  const getDead = (task) => {
-    if (new Date(task.deadline)>new Date()) return 'task good';
-      else {if(new Date(task.deadline)<new Date()) return 'task bad';
-            else return 'task near' ;
-            } 
   }
 
   return (
@@ -65,8 +43,7 @@ function App() {
         removeTask = {removeTask} 
         task = {task}
         editTask ={editTask}
-        getDead = {getDead} 
-        number={index+1}/>
+        />
         
     )}
 
@@ -81,8 +58,7 @@ function App() {
         removeTask = {removeTask} 
         task = {task}
         editTask ={editTask}
-        getDead = {getDead} 
-        number={index+1}/>
+        />
         
     )}
     </div>
