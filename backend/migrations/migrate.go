@@ -20,4 +20,5 @@ func main() {
 	}
 
 	db.AutoMigrate(&entity.ToDoItem{})
+	db.AutoMigrate(&entity.User{})
 }

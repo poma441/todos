@@ -17,6 +17,10 @@ func NewHandler(services *service.Service) *Handler {
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
+	router.POST("/signup", h.Signup)
+	router.POST("/signin", h.Signin)
+	router.POST("/validate", h.UserIdentify)
+
 	todos := router.Group("/todos")
 	{
 		todos.GET("/:userid", h.GetToDoItemsList)

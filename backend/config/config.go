@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 )
 
@@ -10,6 +12,7 @@ type (
 	Config struct {
 		Server `yaml:"server"`
 		DB     `yaml:"db"`
+		Token  `yaml:"token"`
 	}
 
 	// Server
@@ -26,6 +29,17 @@ type (
 		Name     string `yaml:"name"`
 		Password string `yaml:"password"`
 		SslMode  string `yaml:"sslmode"`
+	}
+
+	Token struct {
+		Access `yaml:"access"`
+	}
+
+	Access struct {
+		PrivateKey string        `yaml:"privatekey"`
+		PublicKey  string        `yaml:"publickey"`
+		Ttl        time.Duration `yaml:"ttl"`
+		MaxAge     int           `yaml:"maxAge"`
 	}
 )
 

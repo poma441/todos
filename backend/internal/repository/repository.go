@@ -7,6 +7,9 @@ import (
 )
 
 type Authorization interface {
+	CreateUser(NewUser entity.User) (int, error)
+	GetUser(InputUsername string) (entity.User, error)
+	GetUserById(userId int) (entity.User, error)
 }
 
 type ToDoItem interface {
@@ -23,7 +26,7 @@ type Repository struct {
 
 func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{
-		Authorization: NewAuthRepo(),
+		Authorization: NewAuthRepo(db),
 		ToDoItem:      NewToDoItemRepo(db),
 	}
 }

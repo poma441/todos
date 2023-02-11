@@ -1,12 +1,19 @@
 package service
 
 import (
+	"time"
 	"todos/internal/entity"
 	"todos/internal/repository"
 )
 
 type Authorization interface {
-	PlugFunc()
+	HashPass(inputPass string) string
+	GetUser(inputUsername string) (entity.User, error)
+	GetUserById(userId int) (entity.User, error)
+	CreateUser(newUser entity.User) (int, error)
+	ComparePass(userHashPass string, inputPass string) error
+	CreateToken(ttl time.Duration, userId int, privateKey string) (string, error)
+	ValidateToken(token string, publicKey string) (interface{}, error)
 }
 
 type ToDoItem interface {
