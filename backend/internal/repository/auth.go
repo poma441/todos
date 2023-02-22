@@ -32,7 +32,7 @@ func (r *AuthRepo) CreateUser(newUser entity.User) (int, error) {
 func (r *AuthRepo) GetUser(inputUsername string) (entity.User, error) {
 
 	var user entity.User
-	result := r.db.First(&user, "username=?", inputUsername)
+	result := r.db.First(&user, "email=?", inputUsername)
 	if result.RowsAffected == 0 {
 		return user, errors.New("неверное имя пользователя или пароль")
 	}
