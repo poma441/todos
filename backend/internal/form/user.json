@@ -1,0 +1,18 @@
+{
+    "description": "Input Sign in data",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["email","password"],
+    "properties": {
+        "email": {
+            "type": "string",
+            "pattern": "^\\S+@\\S+\\.\\S+$",
+            "format": "email",
+            "minLength": 6
+        },
+        "password": {
+            "type": "string",
+            "minLength": 5
+        }     
+    }
+}

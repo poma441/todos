@@ -20,6 +20,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router.POST("/signup", h.Signup)
 	router.POST("/signin", h.Signin)
 	router.POST("/validate", h.UserIdentify)
+	router.POST("/valid", h.ValidateUser)
 
 	todos := router.Group("/todos")
 	{

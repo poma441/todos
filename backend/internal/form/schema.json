@@ -1,0 +1,31 @@
+{
+    "description": "Input Student or Repetitor schema",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["role","email","password", "fullname", "phone"],
+    "properties": {
+        "role": {
+            "type": "string",
+            "enum": ["student", "repetitor"],
+            "default": "male"
+        },
+        "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^\\S+@\\S+\\.\\S+$",
+            "minLength": 6
+        },
+        "password": {
+            "type": "string",
+            "minLength": 5
+        },
+        "fullname": {
+            "type": "string",
+            "minLength": 15
+        },
+        "phone": {
+            "type": "string",
+            "minLength": 7
+        }
+    }
+}

@@ -35,7 +35,7 @@ func (h *Handler) Signin(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.Authorization.GetUser(input.Username)
+	user, err := h.services.Authorization.GetUser(input.Email)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

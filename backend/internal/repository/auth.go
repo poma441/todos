@@ -17,7 +17,7 @@ func NewAuthRepo(db *gorm.DB) *AuthRepo {
 
 func (r *AuthRepo) CreateUser(newUser entity.User) (int, error) {
 
-	check := r.db.Where("username=?", newUser.Username).Find(&newUser)
+	check := r.db.Where("email=?", newUser.Email).Find(&newUser)
 	if check.RowsAffected != 0 {
 		return -1, errors.New("пользователем с таким именем существует")
 	}

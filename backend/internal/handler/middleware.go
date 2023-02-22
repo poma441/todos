@@ -6,6 +6,7 @@ import (
 	"todos/config"
 
 	"github.com/gin-gonic/gin"
+	"github.com/xeipuuv/gojsonschema"
 )
 
 func (h *Handler) UserIdentify(c *gin.Context) {
@@ -39,5 +40,38 @@ func (h *Handler) UserIdentify(c *gin.Context) {
 
 	c.Set("currentUser", user)
 	c.Next()
+
+}
+
+func (h *Handler) ValidateUser(c *gin.Context) {
+	var input map[string]interface{}
+	var schemaLoader gojsonschema.JSONLoader
+	if err := c.BindJSON(&input); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	switch len(input) {
+	case 2:
+		schemaLoader = gojsonschema.NewReferenceLoader("file:///home/murex/go/src/todos/backend/internal/form/user.json")
+	case 5:
+		schemaLoader = gojsonschema.NewReferenceLoader("file:///home/murex/go/src/todos/backend/internal/form/schema.json")
+	default:
+		schemaLoader = gojsonschema.NewReferenceLoader("file:///home/murex/go/src/todos/backend/internal/form/user.json")
+	}
+
+	loader := gojsonschema.NewGoLoader(input)
+
+	result, err := gojsonschema.Validate(schemaLoader, loader)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if result.Valid() {
+		c.Next()
+	} else {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"status": "failed"})
+		return
+	}
 
 }
