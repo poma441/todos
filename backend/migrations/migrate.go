@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-
 	cfg, err := config.InitConfig("../config")
 	if err != nil {
 		log.Fatal("Ошибка файла конфигурации:", err)

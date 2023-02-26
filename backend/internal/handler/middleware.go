@@ -1,46 +1,53 @@
 package handler
 
 import (
-	"log"
 	"net/http"
-	"todos/config"
+	"strings"
+	"todos/internal/entity"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xeipuuv/gojsonschema"
 )
 
 func (h *Handler) UserIdentify(c *gin.Context) {
+	// Формирование информации о запросе
+	requestInfo := &entity.RequestAdditionalInfo{
+		UserAgent: c.Request.UserAgent(),
+		IP:        c.ClientIP(),
+	}
 
-	access_token, err := c.Cookie("access_token")
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	header := c.GetHeader("Authorization")
+	if header == "" {
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	if access_token == "" {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "Вы не авторизированы"})
+	headerParts := strings.Split(header, " ")
+	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	cfg, err := config.InitConfig("../../config")
-	if err != nil {
-		log.Fatal("Ошибка инициализации ", err)
-	}
-
-	sub, err := h.services.Authorization.ValidateToken(access_token, cfg.Access.PublicKey)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	user, err := h.services.Authorization.GetUserById(int(sub.(float64)))
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "Пользователя с таким токеном не существует"})
+	access_token := headerParts[1]
+	if len(access_token) == 0 {
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	c.Set("currentUser", user)
-	c.Next()
+	userId, err := h.services.Authorization.ValidateToken(access_token, h.config.Token.Keys.PublicKey, false, requestInfo)
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 
+	// ??? Подумать, возможно, не лучшее решение
+	// user, err := h.services.Authorization.GetUserById(int(userId.(float64)))
+	// if err != nil {
+	// 	c.AbortWithStatus(http.StatusUnauthorized)
+	// 	return
+	// }
+
+	c.Set("CurrentUserId", userId)
 }
 
 func (h *Handler) ValidateUser(c *gin.Context) {

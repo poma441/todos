@@ -12,6 +12,7 @@ type (
 	Config struct {
 		Server `yaml:"server"`
 		DB     `yaml:"db"`
+		Redis  `yaml:"redis"`
 		Token  `yaml:"token"`
 	}
 
@@ -31,20 +32,38 @@ type (
 		SslMode  string `yaml:"sslmode"`
 	}
 
+	// Кэш redis
+	Redis struct {
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		Password string `yaml:"password"`
+		Db       int    `yaml:"db"`
+	}
+
 	Token struct {
-		Access `yaml:"access"`
+		Keys    `yaml:"keys"`
+		Access  `yaml:"access"`
+		Refresh `yaml:"refresh"`
+	}
+
+	Keys struct {
+		PrivateKey string `yaml:"privatekey"`
+		PublicKey  string `yaml:"publickey"`
 	}
 
 	Access struct {
-		PrivateKey string        `yaml:"privatekey"`
-		PublicKey  string        `yaml:"publickey"`
-		Ttl        time.Duration `yaml:"ttl"`
-		MaxAge     int           `yaml:"maxAge"`
+		TTL time.Duration `yaml:"ttl"`
+	}
+
+	Refresh struct {
+		TTL               time.Duration `yaml:"ttl"`
+		SecondsTTL        int           `yaml:"secondsTtl"`
+		RefreshCookiePath string        `yaml:"refreshCookiePath"`
+		LogoutCookiePath  string        `yaml:"logoutCookiePath"`
 	}
 )
 
 func InitConfig(path string) (config Config, err error) {
-	// Инициализация конфига
 	viper.AddConfigPath(path)
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")

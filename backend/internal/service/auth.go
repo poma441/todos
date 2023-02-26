@@ -2,14 +2,14 @@ package service
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"time"
 	"todos/internal/entity"
 	"todos/internal/repository"
+	jwtparser "todos/pkg/jwt_parser"
+	hasher "todos/pkg/password_hasher"
 
 	"github.com/golang-jwt/jwt/v4"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService struct {
@@ -22,59 +22,63 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 	}
 }
 
-func (s *AuthService) HashPass(inputPass string) string {
-	hashPass, err := bcrypt.GenerateFromPassword([]byte(inputPass), bcrypt.DefaultCost)
-	if err != nil {
-		return ""
-
-	}
-
-	return string(hashPass)
-}
-
+/*
+*	Создание пользователя в БД
+ */
 func (s *AuthService) CreateUser(newUser entity.User) (int, error) {
 	return s.repo.CreateUser(newUser)
 }
 
+/*
+*	Получение пользователя из БД по логину
+ */
 func (s *AuthService) GetUser(inputUsername string) (entity.User, error) {
-
 	return s.repo.GetUser(inputUsername)
 }
 
+/*
+*	Получение пользователя из БД по id
+ */
 func (s *AuthService) GetUserById(userId int) (entity.User, error) {
-
 	return s.repo.GetUserById(userId)
 }
 
-func (s *AuthService) ComparePass(userHashPass string, inputPass string) error {
-
-	err := bcrypt.CompareHashAndPassword([]byte(userHashPass), []byte(inputPass))
-	if err != nil {
-		return errors.New("неверное имя пользователя или пароль")
-	}
-	return err
-}
-
-func (s *AuthService) CreateToken(ttl time.Duration, userId int, privateKey string) (string, error) {
-
-	decodePrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
+/*
+*	Функция создания токенов, как access, так и refresh
+ */
+func (s *AuthService) CreateToken(userId int, ttl time.Duration, privateKey string, isRefreshToken bool, requestInfo *entity.RequestAdditionalInfo) (string, error) {
+	decodedPrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
 		return "", err
 	}
 
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodePrivateKey)
+	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
 	if err != nil {
 		return "", err
 	}
 
 	now := time.Now().UTC()
-
 	claims := make(jwt.MapClaims)
 
-	claims["sub"] = userId
-	claims["exp"] = now.Add(ttl).Unix()
-	claims["iat"] = now.Unix()
-	claims["nbf"] = now.Unix()
+	if isRefreshToken {
+		randomHash, err := hasher.GenerateRandomHash256()
+		if err != nil {
+			return "", err
+		}
+
+		claims["sub"] = userId
+		claims["jti"] = randomHash
+		claims["exp"] = now.Add(ttl).Unix()
+
+		// Запись информации о refresh токене в кэш redis
+		if err := s.repo.SaveRefreshToken(userId, randomHash, ttl, requestInfo); err != nil {
+			return "", err
+		}
+
+	} else {
+		claims["sub"] = userId
+		claims["exp"] = now.Add(ttl).Unix()
+	}
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(key)
 	if err != nil {
@@ -82,29 +86,12 @@ func (s *AuthService) CreateToken(ttl time.Duration, userId int, privateKey stri
 	}
 
 	return token, nil
-
 }
 
-func (s *AuthService) ValidateToken(token string, publicKey string) (interface{}, error) {
-	decodePublicKey, err := base64.StdEncoding.DecodeString(publicKey)
+func (s *AuthService) ValidateToken(token string, publicKey string, isRefreshToken bool, requestInfo *entity.RequestAdditionalInfo) (interface{}, error) {
+	tokenParsed, err := jwtparser.RsaSignedTokenParse(token, publicKey)
 	if err != nil {
-		return "", err
-	}
-
-	key, err := jwt.ParseRSAPublicKeyFromPEM(decodePublicKey)
-	if err != nil {
-		return "", fmt.Errorf("validate: ошибка: %w", err)
-	}
-
-	tokenParsed, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
-			return nil, fmt.Errorf("непредвиденный метод: %s", t.Header["alg"])
-		}
-		return key, nil
-	})
-
-	if err != nil {
-		return nil, fmt.Errorf("validate: %w", err)
+		return nil, err
 	}
 
 	claims, ok := tokenParsed.Claims.(jwt.MapClaims)
@@ -112,6 +99,37 @@ func (s *AuthService) ValidateToken(token string, publicKey string) (interface{}
 		return nil, fmt.Errorf("validate: токен не валиден")
 	}
 
-	return claims["sub"], nil
+	if isRefreshToken {
+		requestInfo, err := s.repo.CheckRefreshToken(int(claims["sub"].(float64)), claims["jti"].(string))
+		if err != nil {
+			return nil, err
+		}
 
+		// Заглушка для requestInfo, возможно, в дальнейшем будет использование для выявления подозрительной активности
+		fmt.Print(requestInfo)
+	}
+
+	return claims["sub"], nil
+}
+
+func (s *AuthService) InvalidateRefreshToken(refreshToken string, publicKey string) error {
+	tokenParsed, err := jwtparser.RsaSignedTokenParse(refreshToken, publicKey)
+	if err != nil {
+		return err
+	}
+
+	claims, ok := tokenParsed.Claims.(jwt.MapClaims)
+	if !ok || !tokenParsed.Valid {
+		return fmt.Errorf("validate: токен не валиден")
+	}
+
+	// Удаление из кэша redis
+	userId := claims["sub"].(float64)
+	refreshTokenHash := claims["jti"].(string)
+
+	if err := s.repo.DeleteRefreshToken(int(userId), refreshTokenHash); err != nil {
+		return err
+	}
+
+	return nil
 }

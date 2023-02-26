@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"todos/config"
 	"todos/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -8,21 +9,30 @@ import (
 
 type Handler struct {
 	services *service.Service
+	config   *config.Config
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+func NewHandler(services *service.Service, cfg *config.Config) *Handler {
+	return &Handler{
+		services: services,
+		config:   cfg,
+	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 
-	router.POST("/signup", h.Signup)
-	router.POST("/signin", h.Signin)
-	router.POST("/validate", h.UserIdentify)
-	router.POST("/valid", h.ValidateUser)
+	auth := router.Group("/auth")
+	{
+		auth.POST("/signup", h.SignUp)
+		auth.POST("/signin", h.SignIn)
+		auth.POST("/logout", h.Logout)
+		auth.POST("/refresh", h.Refresh)
+	}
 
-	todos := router.Group("/todos")
+	// router.POST("/valid", h.ValidateUser)
+
+	todos := router.Group("/todos", h.UserIdentify)
 	{
 		todos.GET("/:userid", h.GetToDoItemsList)
 		todos.POST("/:userid", h.AddToDoItem)

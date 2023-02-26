@@ -7,13 +7,15 @@ import (
 )
 
 type Authorization interface {
-	HashPass(inputPass string) string
+	// Работа с пользователем
+	CreateUser(newUser entity.User) (int, error)
 	GetUser(inputUsername string) (entity.User, error)
 	GetUserById(userId int) (entity.User, error)
-	CreateUser(newUser entity.User) (int, error)
-	ComparePass(userHashPass string, inputPass string) error
-	CreateToken(ttl time.Duration, userId int, privateKey string) (string, error)
-	ValidateToken(token string, publicKey string) (interface{}, error)
+
+	// Работа с токенами
+	CreateToken(userId int, ttl time.Duration, privateKey string, isRefreshToken bool, requestInfo *entity.RequestAdditionalInfo) (string, error)
+	ValidateToken(token string, publicKey string, isRefreshToken bool, requestInfo *entity.RequestAdditionalInfo) (interface{}, error)
+	InvalidateRefreshToken(refreshToken string, publicKey string) error
 }
 
 type ToDoItem interface {
