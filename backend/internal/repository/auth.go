@@ -23,7 +23,7 @@ func NewAuthRepo(db *gorm.DB, redisConn *redis.Client) *AuthRepo {
 	}
 }
 
-func (r *AuthRepo) CreateUser(newUser entity.User) (int, error) {
+func (r *AuthRepo) CreateUser(newUser entity.Student) (int, error) {
 
 	check := r.db.Where("email=?", newUser.Email).Find(&newUser)
 	if check.RowsAffected != 0 {
@@ -37,8 +37,8 @@ func (r *AuthRepo) CreateUser(newUser entity.User) (int, error) {
 	return newUser.Id, nil
 }
 
-func (r *AuthRepo) GetUser(inputUsername string) (entity.User, error) {
-	var user entity.User
+func (r *AuthRepo) GetUser(inputUsername string) (entity.Student, error) {
+	var user entity.Student
 	result := r.db.First(&user, "email=?", inputUsername)
 	if result.RowsAffected == 0 {
 		return user, errors.New("неверное имя пользователя или пароль")

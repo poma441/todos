@@ -8,8 +8,8 @@ import (
 
 type Authorization interface {
 	// Работа с пользователем
-	CreateUser(newUser entity.User) (int, error)
-	GetUser(inputUsername string) (entity.User, error)
+	CreateUser(newUser entity.Student) (int, error)
+	GetUser(inputUsername string) (entity.Student, error)
 	GetUserById(userId int) (entity.User, error)
 
 	// Работа с токенами

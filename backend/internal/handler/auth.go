@@ -19,8 +19,8 @@ func (h *Handler) SignUp(c *gin.Context) {
 		IP:        c.ClientIP(),
 	}
 
-	var input entity.User
-	if err := c.BindJSON(&input); err != nil {
+	var input entity.Student
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -49,7 +49,7 @@ func (h *Handler) SignUp(c *gin.Context) {
 
 	c.SetCookie("refresh_token", refreshToken, 0, h.config.Token.Refresh.RefreshCookiePath, h.config.Server.Host, false, true)
 	c.SetCookie("logout_refresh_token", refreshToken, 0, h.config.Token.Refresh.LogoutCookiePath, h.config.Server.Host, false, true)
-	c.JSON(http.StatusOK, gin.H{"success": true, "access_token": accessToken})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
 /*
@@ -95,7 +95,7 @@ func (h *Handler) SignIn(c *gin.Context) {
 
 	c.SetCookie("refresh_token", refreshToken, 0, h.config.Token.Refresh.RefreshCookiePath, h.config.Server.Host, false, true)
 	c.SetCookie("logout_refresh_token", refreshToken, 0, h.config.Token.Refresh.LogoutCookiePath, h.config.Server.Host, false, true)
-	c.JSON(http.StatusOK, gin.H{"success": true, "access_token": accessToken})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
 /*
@@ -145,7 +145,7 @@ func (h *Handler) Refresh(c *gin.Context) {
 
 	c.SetCookie("refresh_token", newRefreshToken, 0, h.config.Token.Refresh.RefreshCookiePath, h.config.Server.Host, false, true)
 	c.SetCookie("logout_refresh_token", newRefreshToken, 0, h.config.Token.Refresh.LogoutCookiePath, h.config.Server.Host, false, true)
-	c.JSON(http.StatusOK, gin.H{"success": true, "access_token": newAccessToken})
+	c.JSON(http.StatusOK, gin.H{"status": "success", "access_token": newAccessToken})
 }
 
 /*

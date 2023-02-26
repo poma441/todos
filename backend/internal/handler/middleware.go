@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 	"todos/internal/entity"
@@ -50,25 +53,32 @@ func (h *Handler) UserIdentify(c *gin.Context) {
 	c.Set("CurrentUserId", userId)
 }
 
+// Обработчик валидации данных на основе json-схемы
 func (h *Handler) ValidateUser(c *gin.Context) {
 	var input map[string]interface{}
 	var schemaLoader gojsonschema.JSONLoader
-	if err := c.BindJSON(&input); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+
+	req, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "failed"})
 		return
 	}
 
-	switch len(input) {
-	case 2:
+	json.Unmarshal(req, &input)
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(req))
+
+	usedPath := c.Request.URL.Path
+	switch usedPath {
+	case "/auth/signin":
 		schemaLoader = gojsonschema.NewReferenceLoader("file:///home/murex/go/src/todos/backend/internal/form/user.json")
-	case 5:
+	case "/auth/signup":
 		schemaLoader = gojsonschema.NewReferenceLoader("file:///home/murex/go/src/todos/backend/internal/form/schema.json")
 	default:
-		schemaLoader = gojsonschema.NewReferenceLoader("file:///home/murex/go/src/todos/backend/internal/form/user.json")
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "failed"})
+		return
 	}
 
 	loader := gojsonschema.NewGoLoader(input)
-
 	result, err := gojsonschema.Validate(schemaLoader, loader)
 	if err != nil {
 		panic(err.Error())

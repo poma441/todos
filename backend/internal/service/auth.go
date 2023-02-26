@@ -25,14 +25,14 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 /*
 *	Создание пользователя в БД
  */
-func (s *AuthService) CreateUser(newUser entity.User) (int, error) {
+func (s *AuthService) CreateUser(newUser entity.Student) (int, error) {
 	return s.repo.CreateUser(newUser)
 }
 
 /*
 *	Получение пользователя из БД по логину
  */
-func (s *AuthService) GetUser(inputUsername string) (entity.User, error) {
+func (s *AuthService) GetUser(inputUsername string) (entity.Student, error) {
 	return s.repo.GetUser(inputUsername)
 }
 

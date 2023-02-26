@@ -24,13 +24,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/signup", h.SignUp)
-		auth.POST("/signin", h.SignIn)
+		auth.POST("/signup", h.ValidateUser, h.SignUp)
+		auth.POST("/signin", h.ValidateUser, h.SignIn)
 		auth.POST("/logout", h.Logout)
 		auth.POST("/refresh", h.Refresh)
 	}
-
-	// router.POST("/valid", h.ValidateUser)
 
 	todos := router.Group("/todos", h.UserIdentify)
 	{
