@@ -10,12 +10,12 @@ import (
 func main() {
 	cfg, err := config.InitConfig("../config")
 	if err != nil {
-		log.Fatal("Ошибка файла конфигурации:", err)
+		log.Fatal("Ошибка файла конфигурации: ", err)
 	}
 
 	db, err := postgres.NewConnectDB(cfg)
 	if err != nil {
-		log.Fatal("Ошибка:", err)
+		log.Fatal("Ошибка: ", err)
 	}
 
 	db.AutoMigrate(&entity.ToDoItem{})

@@ -1,9 +1,9 @@
 server:
-  host: "localhost"
+  host: "0.0.0.0"
   port: "5100"
 
 db:
-  host: "localhost"
+  host: "postgres_test"
   port: "5432"
   username: "postgres"
   name: "todos_db"
@@ -11,7 +11,7 @@ db:
   sslmode: "disable"
 
 redis:
-  host: "localhost"
+  host: "redis_test"
   port: "6379"
   password: "redis123"
   db: 0

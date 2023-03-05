@@ -15,7 +15,7 @@ import (
 func main() {
 	cfg, err := config.InitConfig("../config")
 	if err != nil {
-		log.Fatal("Ошибка инициализации ", err)
+		log.Fatal("Ошибка инициализации: ", err)
 	}
 
 	// Создание соединения с Postgres
@@ -38,6 +38,6 @@ func main() {
 	fmt.Printf("Попытка запуска сервера на: %s:%s\n", cfg.Server.Host, cfg.Server.Port)
 
 	if err := server.Run(cfg, handler.InitRoutes()); err != nil {
-		log.Fatal("Ошибка запуска сервера", err)
+		log.Fatal("Ошибка запуска сервера: ", err)
 	}
 }

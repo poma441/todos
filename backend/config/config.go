@@ -64,6 +64,10 @@ type (
 )
 
 func InitConfig(path string) (config Config, err error) {
+	// Для docker, потом подумать как исправить
+	viper.AddConfigPath("/app/config")
+	viper.AddConfigPath("./config")
+
 	viper.AddConfigPath(path)
 	viper.SetConfigName("config")
 	viper.SetConfigType("yml")
