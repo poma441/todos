@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "./services/auth-svc/internal/pb";
+
+service AuthService {
+    rpc Register(RegisterRequest) returns (RegisterResponse) {}                         // Регистрация
+    rpc Login(LoginRequest) returns (LoginResponse) {}                                  // Вход
+    rpc Validate(ValidateRequest) returns (ValidateResponse) {}                         // Проверка токена
+    rpc RefreshTokens(RefreshTokensRequest) returns (RefreshTokensResponse) {}          // Обновление пары токенов
+    rpc InvalidateTokens(InvalidateTokensRequest) returns (InvalidateTokensResponse) {} // Инвалидация токенов (logout)
+}
+
+/***************************************/
+/*  Структура с информацией о запросе  */
+/***************************************/
+message RequestAdditionalInfo {
+    string user_agent = 1;
+    string src_ip_addr = 2;
+}
+
+/******************************************************/
+/*  Структура с информацией о сформированных токенах  */
+/******************************************************/
+message TokensInfo {
+    string access_token = 1;
+    string refresh_token = 2;
+    string refresh_cookie_path = 3;
+    string logout_cookie_path = 4;
+    string refresh_cookie_host = 5;
+    string logout_cookie_host = 6;
+}
+
+/**********************************************************/
+/*  Структура запроса-ответа на регистрацию пользователя  */
+/**********************************************************/
+message RegisterRequest {
+    string email = 1;
+    string password = 2;
+    RequestAdditionalInfo request_info = 3;
+}
+
+message RegisterResponse {
+    bool success = 1;
+    string error = 2;
+    string uuid = 3;
+    TokensInfo tokens_info = 4;
+}
+
+/***************************************************/
+/*  Структура запроса-ответа на вход пользователя  */
+/***************************************************/
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+    RequestAdditionalInfo request_info = 3;
+}
+
+message LoginResponse {
+    bool success = 1;
+    string error = 2;
+    string uuid = 3;
+    TokensInfo tokens_info = 4;
+}
+
+/**********************************************************************/
+/*  Структура запроса-ответа на валидацию access токена пользователя  */
+/**********************************************************************/
+message ValidateRequest {
+    string access_token = 1;
+    RequestAdditionalInfo request_info = 2;
+}
+
+message ValidateResponse {
+    bool success = 1;
+    string error = 2;
+    int32 uuid = 3;
+}
+
+/**********************************************************************/
+/*  Структура запроса-ответа на обновление пары токенов пользователя  */
+/**********************************************************************/
+message RefreshTokensRequest {
+    string refresh_token = 1;
+    RequestAdditionalInfo request_info = 2;
+}
+
+message RefreshTokensResponse {
+    bool success = 1;
+    string error = 2;
+    TokensInfo tokens_info = 3;
+}
+
+/***********************************************************************/
+/*  Структура запроса-ответа на инвалидацию пары токенов пользователя  */
+/***********************************************************************/
+message InvalidateTokensRequest {
+    string refresh_token = 1;
+    RequestAdditionalInfo request_info = 2;
+}
+
+message InvalidateTokensResponse {
+    TokensInfo tokens_info = 1;
+}

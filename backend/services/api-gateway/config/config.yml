@@ -1,0 +1,13 @@
+apigatewayserver:
+  host: "0.0.0.0"
+  port: "5100"
+
+authsvcserver:
+  host: "0.0.0.0"
+  port: "5110"
+
+todossvcserver:
+  host: "0.0.0.0"
+  port: "5120"
+
+  
