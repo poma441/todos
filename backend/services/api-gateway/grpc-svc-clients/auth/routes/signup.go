@@ -3,7 +3,7 @@ package routes
 import (
 	"context"
 	"net/http"
-	"todos/pkg/entity"
+	"todos/internal/entity"
 	"todos/services/api-gateway/grpc-svc-clients/auth/pb"
 
 	"github.com/gin-gonic/gin"

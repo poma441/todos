@@ -3,7 +3,7 @@ package postgres
 import (
 	"fmt"
 	"log"
-	"todos/config"
+	"todos/services/auth-svc/config"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

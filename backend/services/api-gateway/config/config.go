@@ -8,9 +8,9 @@ type (
 
 	// Config
 	Config struct {
-		ApiGatewayServer `yaml:"apigatewayserver"`
-		AuthSvcServer    `yaml:"authsvcserver"`
-		TodosSvcServer   `yaml:"todossvcserver"`
+		ApiGatewayServer `yaml:"apiGatewayServer"`
+		AuthSvcServer    `yaml:"authSvcServer"`
+		TodosSvcServer   `yaml:"todosSvcServer"`
 	}
 
 	// Api-Gateway Server

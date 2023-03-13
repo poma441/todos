@@ -75,7 +75,7 @@ message ValidateRequest {
 message ValidateResponse {
     bool success = 1;
     string error = 2;
-    int32 uuid = 3;
+    string uuid = 3;
 }
 
 /**********************************************************************/

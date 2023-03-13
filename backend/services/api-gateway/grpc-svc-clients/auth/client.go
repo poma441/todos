@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"todos/services/api-gateway/config"
 	"todos/services/api-gateway/grpc-svc-clients/auth/pb"
+	"todos/services/api-gateway/grpc-svc-clients/auth/routes"
 
+	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
 
@@ -19,4 +21,8 @@ func InitServiceClient(c *config.Config) pb.AuthServiceClient {
 	}
 
 	return pb.NewAuthServiceClient(cc)
+}
+
+func (svc *ServiceClient) SignUp(ctx *gin.Context) {
+	routes.SignUp(ctx, svc.Client)
 }

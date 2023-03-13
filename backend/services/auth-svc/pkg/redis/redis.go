@@ -2,7 +2,7 @@ package redis
 
 import (
 	"fmt"
-	"todos/config"
+	"todos/services/auth-svc/config"
 
 	"github.com/go-redis/redis"
 )

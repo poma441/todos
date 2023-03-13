@@ -1,4 +1,4 @@
-package jwtparser
+package jwthelper
 
 import (
 	"encoding/base64"
