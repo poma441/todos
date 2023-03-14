@@ -38,7 +38,10 @@ message TokensInfo {
 message RegisterRequest {
     string email = 1;
     string password = 2;
-    RequestAdditionalInfo request_info = 3;
+    string role = 3;
+    string phone = 4;
+    string fullname = 5;
+    RequestAdditionalInfo request_info = 6;
 }
 
 message RegisterResponse {

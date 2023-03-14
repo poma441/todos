@@ -1,4 +1,4 @@
-package entity
+package models
 
 type RequestAdditionalInfo struct {
 	UserAgent string `json:"user-agent"`

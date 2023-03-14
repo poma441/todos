@@ -3,9 +3,10 @@ package service
 import (
 	"context"
 	"time"
-	"todos/internal/entity"
+	"todos/services/auth-svc/config"
 	"todos/services/auth-svc/internal/pb"
 	"todos/services/auth-svc/internal/repository"
+	"todos/services/auth-svc/models"
 )
 
 /************************/
@@ -13,15 +14,15 @@ import (
 /************************/
 type Authorization interface {
 	// Работа с пользователем
-	CreateUser(newUser entity.Student) (int, error)
-	GetUser(inputUsername string) (entity.Student, error)
-	GetUserById(userId int) (entity.User, error)
+	getUser(inputUsername string) (models.User, error)
+	getUserById(userId int) (models.User, error)
 
 	// Работа с токенами
-	CreateToken(userId int, ttl time.Duration, privateKey string, isRefreshToken bool, requestInfo *entity.RequestAdditionalInfo) (string, error)
-	ValidateToken(token string, publicKey string, isRefreshToken bool, requestInfo *entity.RequestAdditionalInfo) (interface{}, error)
-	InvalidateRefreshToken(refreshToken string, publicKey string) error
+	createToken(uuid string, ttl time.Duration, privateKey string, isRefreshToken bool, requestInfo *models.RequestAdditionalInfo) (string, error)
+	validateToken(token string, publicKey string, isRefreshToken bool, requestInfo *models.RequestAdditionalInfo) (interface{}, error)
+	invalidateRefreshToken(refreshToken string, publicKey string) error
 
+	// Процедуры gRPC
 	Register(context.Context, *pb.RegisterRequest) (*pb.RegisterResponse, error)
 	Login(context.Context, *pb.LoginRequest) (*pb.LoginResponse, error)
 	Validate(context.Context, *pb.ValidateRequest) (*pb.ValidateResponse, error)
@@ -36,8 +37,8 @@ type Service struct {
 	Authorization
 }
 
-func NewService(r *repository.Repository) *Service {
+func NewService(r *repository.Repository, cfg *config.Config) *Service {
 	return &Service{
-		Authorization: NewAuthService(r.Authorization),
+		Authorization: NewAuthService(r.Authorization, cfg),
 	}
 }

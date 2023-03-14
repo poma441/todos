@@ -5,37 +5,83 @@ import (
 	"encoding/base64"
 	"fmt"
 	"time"
-	"todos/internal/entity"
+	"todos/services/auth-svc/config"
 	"todos/services/auth-svc/internal/pb"
 	"todos/services/auth-svc/internal/repository"
+	"todos/services/auth-svc/models"
 	jwthelper "todos/services/auth-svc/pkg/jwt_helper"
 	hasher "todos/services/auth-svc/pkg/password_hasher"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 )
 
 type AuthService struct {
+	cfg  *config.Config
 	repo repository.Authorization
 }
 
-func NewAuthService(repo repository.Authorization) *AuthService {
+func NewAuthService(repo repository.Authorization, cfg *config.Config) *AuthService {
 	return &AuthService{
+		cfg:  cfg,
 		repo: repo,
 	}
 }
 
 func (s *AuthService) Register(ctx context.Context, r *pb.RegisterRequest) (*pb.RegisterResponse, error) {
+	requestInfo := &models.RequestAdditionalInfo{
+		UserAgent: r.RequestInfo.GetUserAgent(),
+		SrcIP:     r.RequestInfo.GetSrcIpAddr(),
+	}
+
+	user := models.User{
+		Email:    r.Email,
+		Password: hasher.HashPass(r.Password),
+		Role:     r.Role,
+		Phone:    r.Phone,
+		FullName: r.Fullname,
+	}
+
+	// Создание пользователя
+	user.Uuid = uuid.New().String()
+
+	_, err := s.repo.CreateUser(user)
+	if err != nil {
+		return &pb.RegisterResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, nil
+	}
+
+	// Генерация access токена
+	accessToken, err := s.createToken(user.Uuid, s.cfg.Token.Access.TTL, s.cfg.Token.Keys.PrivateKey, false, requestInfo)
+	if err != nil {
+		return &pb.RegisterResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, nil
+	}
+
+	// Генерация refresh токена
+	refreshToken, err := s.createToken(user.Uuid, s.cfg.Token.Refresh.TTL, s.cfg.Token.Keys.PrivateKey, true, requestInfo)
+	if err != nil {
+		return &pb.RegisterResponse{
+			Success: false,
+			Error:   err.Error(),
+		}, nil
+	}
+
 	return &pb.RegisterResponse{
 		Success: true,
 		Error:   "",
-		Uuid:    "",
+		Uuid:    user.Uuid,
 		TokensInfo: &pb.TokensInfo{
-			AccessToken:       "",
-			RefreshToken:      "",
-			RefreshCookiePath: "",
-			RefreshCookieHost: "",
-			LogoutCookiePath:  "",
-			LogoutCookieHost:  "",
+			AccessToken:       accessToken,
+			RefreshToken:      refreshToken,
+			RefreshCookieHost: s.cfg.Server.Host,
+			LogoutCookieHost:  s.cfg.Server.Host,
+			RefreshCookiePath: s.cfg.Token.Refresh.RefreshCookiePath,
+			LogoutCookiePath:  s.cfg.Token.Refresh.LogoutCookiePath,
 		},
 	}, nil
 }
@@ -93,30 +139,23 @@ func (s *AuthService) InvalidateTokens(ctx context.Context, r *pb.InvalidateToke
 }
 
 /*
-*	Создание пользователя в БД
- */
-func (s *AuthService) CreateUser(newUser entity.Student) (int, error) {
-	return s.repo.CreateUser(newUser)
-}
-
-/*
 *	Получение пользователя из БД по логину
  */
-func (s *AuthService) GetUser(inputUsername string) (entity.Student, error) {
+func (s *AuthService) getUser(inputUsername string) (models.User, error) {
 	return s.repo.GetUser(inputUsername)
 }
 
 /*
 *	Получение пользователя из БД по id
  */
-func (s *AuthService) GetUserById(userId int) (entity.User, error) {
+func (s *AuthService) getUserById(userId int) (models.User, error) {
 	return s.repo.GetUserById(userId)
 }
 
 /*
 *	Функция создания токенов, как access, так и refresh
  */
-func (s *AuthService) CreateToken(userId int, ttl time.Duration, privateKey string, isRefreshToken bool, requestInfo *entity.RequestAdditionalInfo) (string, error) {
+func (s *AuthService) createToken(uuid string, ttl time.Duration, privateKey string, isRefreshToken bool, requestInfo *models.RequestAdditionalInfo) (string, error) {
 	decodedPrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
 		return "", err
@@ -136,17 +175,17 @@ func (s *AuthService) CreateToken(userId int, ttl time.Duration, privateKey stri
 			return "", err
 		}
 
-		claims["sub"] = userId
+		claims["sub"] = uuid
 		claims["jti"] = randomHash
 		claims["exp"] = now.Add(ttl).Unix()
 
 		// Запись информации о refresh токене в кэш redis
-		if err := s.repo.SaveRefreshToken(userId, randomHash, ttl, requestInfo); err != nil {
+		if err := s.repo.SaveRefreshToken(uuid, randomHash, ttl, requestInfo); err != nil {
 			return "", err
 		}
 
 	} else {
-		claims["sub"] = userId
+		claims["sub"] = uuid
 		claims["exp"] = now.Add(ttl).Unix()
 	}
 
@@ -158,7 +197,7 @@ func (s *AuthService) CreateToken(userId int, ttl time.Duration, privateKey stri
 	return token, nil
 }
 
-func (s *AuthService) ValidateToken(token string, publicKey string, isRefreshToken bool, requestInfo *entity.RequestAdditionalInfo) (interface{}, error) {
+func (s *AuthService) validateToken(token string, publicKey string, isRefreshToken bool, requestInfo *models.RequestAdditionalInfo) (interface{}, error) {
 	tokenParsed, err := jwthelper.RsaSignedTokenParse(token, publicKey)
 	if err != nil {
 		return nil, err
@@ -170,7 +209,7 @@ func (s *AuthService) ValidateToken(token string, publicKey string, isRefreshTok
 	}
 
 	if isRefreshToken {
-		requestInfo, err := s.repo.CheckRefreshToken(int(claims["sub"].(float64)), claims["jti"].(string))
+		requestInfo, err := s.repo.CheckRefreshToken(claims["sub"].(string), claims["jti"].(string))
 		if err != nil {
 			return nil, err
 		}
@@ -182,7 +221,7 @@ func (s *AuthService) ValidateToken(token string, publicKey string, isRefreshTok
 	return claims["sub"], nil
 }
 
-func (s *AuthService) InvalidateRefreshToken(refreshToken string, publicKey string) error {
+func (s *AuthService) invalidateRefreshToken(refreshToken string, publicKey string) error {
 	tokenParsed, err := jwthelper.RsaSignedTokenParse(refreshToken, publicKey)
 	if err != nil {
 		return err
@@ -194,10 +233,10 @@ func (s *AuthService) InvalidateRefreshToken(refreshToken string, publicKey stri
 	}
 
 	// Удаление из кэша redis
-	userId := claims["sub"].(float64)
+	uuid := claims["sub"].(string)
 	refreshTokenHash := claims["jti"].(string)
 
-	if err := s.repo.DeleteRefreshToken(int(userId), refreshTokenHash); err != nil {
+	if err := s.repo.DeleteRefreshToken(uuid, refreshTokenHash); err != nil {
 		return err
 	}
 

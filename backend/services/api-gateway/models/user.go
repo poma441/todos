@@ -1,16 +1,11 @@
-package entity
+package models
 
-type Student struct {
+type User struct {
 	Id       int    `json:"-" gorm:"primaryKey"`
+	Uuid     string `json:"-" gorm:"unique"`
 	Role     string `json:"role"`
 	Email    string `json:"email" gorm:"unique"`
 	Password string `json:"password"`
 	FullName string `json:"fullname"`
 	Phone    string `json:"phone"`
-}
-
-type User struct {
-	Id       int    `json:"-"`
-	Email    string `json:"email" gorm:"unique"`
-	Password string `json:"password"`
 }

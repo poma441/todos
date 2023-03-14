@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"todos/services/auth-svc/config"
@@ -33,10 +34,10 @@ func main() {
 
 	// Внедрение зависимостей
 	repo := repository.NewRepository(db, redisConn)
-	service := service.NewService(repo)
+	service := service.NewService(repo, &cfg)
 
 	// Запуск TCP сервера
-	lis, err := net.Listen("tcp", cfg.Server.Port)
+	lis, err := net.Listen("tcp", cfg.Server.Host+":"+cfg.Server.Port)
 	if err != nil {
 		log.Fatal("Не удалось запустить tcp сервер для сервиса auth: ", err)
 	}
@@ -45,9 +46,11 @@ func main() {
 	grpcServer := grpc.NewServer()
 
 	// Связывание созданного grpc сервера и слоя бизнес логики
-	pb.RegisterAuthServiceServer(grpcServer, &service.Authorization)
+	pb.RegisterAuthServiceServer(grpcServer, service.Authorization)
+
+	fmt.Println("Сервер аутентификации запущен")
 
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatal("Не удалось запустить grpc сервер сервиса auth: ", err)
+		log.Fatal("Не удалось запустить grpc сервер для сервиса auth: ", err)
 	}
 }

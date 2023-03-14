@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"todos/internal/entity"
+	"todos/services/auth-svc/models"
 
 	"github.com/go-redis/redis"
 	"gorm.io/gorm"
@@ -23,11 +23,11 @@ func NewAuthRepo(db *gorm.DB, redisConn *redis.Client) *AuthRepo {
 	}
 }
 
-func (r *AuthRepo) CreateUser(newUser entity.Student) (int, error) {
+func (r *AuthRepo) CreateUser(newUser models.User) (int, error) {
 
 	check := r.db.Where("email=?", newUser.Email).Find(&newUser)
 	if check.RowsAffected != 0 {
-		return -1, errors.New("пользователем с таким именем существует")
+		return -1, errors.New("пользователь с таким именем существует")
 	}
 	result := r.db.Create(&newUser)
 	if result.RowsAffected == 0 {
@@ -37,8 +37,8 @@ func (r *AuthRepo) CreateUser(newUser entity.Student) (int, error) {
 	return newUser.Id, nil
 }
 
-func (r *AuthRepo) GetUser(inputUsername string) (entity.Student, error) {
-	var user entity.Student
+func (r *AuthRepo) GetUser(inputUsername string) (models.User, error) {
+	var user models.User
 	result := r.db.First(&user, "email=?", inputUsername)
 	if result.RowsAffected == 0 {
 		return user, errors.New("неверное имя пользователя или пароль")
@@ -47,9 +47,9 @@ func (r *AuthRepo) GetUser(inputUsername string) (entity.Student, error) {
 	return user, nil
 }
 
-func (r *AuthRepo) GetUserById(userId int) (entity.User, error) {
+func (r *AuthRepo) GetUserById(userId int) (models.User, error) {
 
-	var currentUser entity.User
+	var currentUser models.User
 	result := r.db.First(&currentUser, "id=?", userId)
 
 	if result.RowsAffected == 0 {
@@ -62,13 +62,13 @@ func (r *AuthRepo) GetUserById(userId int) (entity.User, error) {
 /*
 *	Функция сохранения refresh токена в кэше redis
  */
-func (r *AuthRepo) SaveRefreshToken(userId int, refreshTokenHash string, ttl time.Duration, requestInfo *entity.RequestAdditionalInfo) error {
+func (r *AuthRepo) SaveRefreshToken(uuid string, refreshTokenHash string, ttl time.Duration, requestInfo *models.RequestAdditionalInfo) error {
 	requestInfoJson, err := json.Marshal(requestInfo)
 	if err != nil {
 		return err
 	}
 
-	err = r.redisConn.Set(fmt.Sprintf("user:%d:%s", userId, refreshTokenHash), requestInfoJson, ttl).Err()
+	err = r.redisConn.Set(fmt.Sprintf("user:%s:%s", uuid, refreshTokenHash), requestInfoJson, ttl).Err()
 	if err != nil {
 		return err
 	}
@@ -79,9 +79,9 @@ func (r *AuthRepo) SaveRefreshToken(userId int, refreshTokenHash string, ttl tim
 /*
 *	Функция проверки наличия рефреш токена в кэше
  */
-func (r *AuthRepo) CheckRefreshToken(userId int, refreshTokenHash string) (*entity.RequestAdditionalInfo, error) {
-	requestUnmarshalledInfo := new(entity.RequestAdditionalInfo)
-	key := fmt.Sprintf("user:%d:%s", userId, refreshTokenHash)
+func (r *AuthRepo) CheckRefreshToken(uuid string, refreshTokenHash string) (*models.RequestAdditionalInfo, error) {
+	requestUnmarshalledInfo := new(models.RequestAdditionalInfo)
+	key := fmt.Sprintf("user:%s:%s", uuid, refreshTokenHash)
 
 	// Проверка существования данного ключа
 	if existance := r.redisConn.Exists(key).Val(); existance == 0 {
@@ -104,8 +104,8 @@ func (r *AuthRepo) CheckRefreshToken(userId int, refreshTokenHash string) (*enti
 /*
 *	Функция удаления refresh token'a из кэша redis
  */
-func (r *AuthRepo) DeleteRefreshToken(userId int, refreshTokenHash string) error {
-	key := fmt.Sprintf("user:%d:%s", userId, refreshTokenHash)
+func (r *AuthRepo) DeleteRefreshToken(uuid string, refreshTokenHash string) error {
+	key := fmt.Sprintf("user:%s:%s", uuid, refreshTokenHash)
 
 	// Проверка существования данного ключа
 	if existance := r.redisConn.Exists(key).Val(); existance == 0 {
